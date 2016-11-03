@@ -1,0 +1,475 @@
+<!--
+Chao Lin
+Robert Leese
+CS 286
+Dr.Dale
+American Civil War
+-->
+
+<html>
+<head>
+<title>Civil War</title>
+<meta charset="UTF-8" />
+<link rel="stylesheet" href="style.css">
+<script	src="http://maps.google.com/maps/api/js?"> </script>
+<script src="battles.js"></script>
+<script>
+var counter = 0;
+var map;
+var info; //for the infoWindow
+var currentMarker;
+
+//arrays to store eight sets of markers
+var markers1 = [];
+var markers2 = [];
+var markers3 = [];
+var markers4 = [];
+var markers5 = [];
+var markers6 = [];
+var markers7 = [];
+var markers8 = [];
+
+var currentWindow;
+var descriptionInUse = false;
+
+var animation;
+
+/*marker icon - provided by the author from the book*/
+var whitepin = 'http://labs.google.com/ridefinder/images/mm_20_white.png';
+var redpin = 'http://labs.google.com/ridefinder/images/mm_20_red.png';
+
+function initialize(){
+
+  var iniLocation = new google.maps.LatLng(39.50, -98.35);
+  var minZoom = 5;
+
+  var styles = [
+    {
+	featureType: "water",
+	elementType: "geometry.fill",
+	stylers:[
+	  {color:'#ADC9B8'},
+	]
+	},{
+	featureType: "road",
+	elementType: "all",
+	stylers: [
+	  {visibility:"off"}
+	]
+	}
+  ];
+
+  var styledMap = new google.maps.StyledMapType(styles, {name:"Styled Map"});
+
+  var settings = {
+    zoom: minZoom,
+    center: iniLocation,
+    mapTypeId: [google.maps.MapTypeId.SATELLITE, 'map_style'],
+    disableDefaultUI:true
+  }
+
+  map = new google.maps.Map(document.getElementById("map"), settings);
+
+  map.mapTypes.set('map_style', styledMap);
+  map.setMapTypeId('map_style');
+
+  /*
+  Below is kml that highlights the states,
+  sepearated into three sections:
+  1)confederate
+  2)union
+  3)border
+  */
+  var confederate = new google.maps.KmlLayer({
+	url: "http://hive.sewanee.edu/linc0/CS286/CivilWar/confederateStates.kml",
+  });
+  confederate.setMap(map);
+
+  var union1 = new google.maps.KmlLayer({
+	url: "http://hive.sewanee.edu/linc0/CS286/CivilWar/UnionStates.kml",
+  })
+  union1.setMap(map);
+
+  var union2 = new google.maps.KmlLayer({
+	url: "http://hive.sewanee.edu/linc0/CS286/CivilWar/UnionStates2.kml",
+  })
+  union2.setMap(map);
+
+  var union3 = new google.maps.KmlLayer({
+   	url: "http://hive.sewanee.edu/linc0/CS286/CivilWar/UnionStates3.kml",
+  })
+  union3.setMap(map);
+  
+  var borderState = new google.maps.KmlLayer({
+	url: "http://hive.sewanee.edu/linc0/CS286/CivilWar/borderStates.kml",
+  })
+  borderState.setMap(map);
+
+  //limits zoom-out level
+  google.maps.event.addListener(map, 'zoom_changed', function() {
+      if (map.getZoom() < minZoom) map.setZoom(minZoom)
+  });
+	  
+  };
+
+  /*This function does a few things. It matches the correct battle chosen and 
+  puts the battle description on the website. It also provides animation for the 
+  description as well as the selected markers(bouncing effect)*/
+  function showInfo(m, battles){
+    for(var item in battles){
+	  if(m.title==battles[item]['name']){
+		info = new google.maps.InfoWindow({
+	            content:"<table style='width:100%;background:#E5E4D7'><tr>"
+	           +"<tr><td>Name:</td><td align='right'>"
+	           +battles[item]['name']+"</td></tr>"
+	           +"<tr><td>Date:</td><td align='right'>"
+	           +battles[item]['date']+"</td></tr>"
+	           +"<tr><td>Total Casualty:</td><td align='right'>"
+	           +battles[item]['totalCasualty']+"</td></tr>"
+	           +"<tr><td>Union Casualty:</td><td align='right'>"
+	           +battles[item]['unionCasualty']+"</td></tr>"
+	           +"<tr><td>Confederate Casualty:</td><td align='right'>"
+	           +battles[item]['confedCasualty']+"</td></tr>"
+	           +"<tr><td>Victor:</td><td align='right'>"
+	           +battles[item]['victor']+"</td></tr>"
+	           +"</tr></table>"
+		     })
+
+	  if(currentWindow!=null){
+	    currentWindow.close();
+	  }
+	  currentWindow = info;
+			 
+	  /*Set the innerHtml to empty string after each click on the marker
+	   so the details won't add up from the previous one*/
+	  document.getElementById('details').innerHTML = " ";
+	  window.clearInterval(animation);
+
+	  /*letter animation for the description*/
+	  var details = battles[item]['description'];
+	  var count = 0;
+		     
+      animation = window.setInterval(function(){
+	    document.getElementById('details').innerHTML += details.charAt(count);
+        count++;
+	    if(count==details.length){clearInterval(animation);};
+	  },5);
+		     
+
+      //displays the tile of the batle
+	  document.getElementById('battleName').innerHTML = m.title
+	  //opens the infoWindow when the marker is clicked 
+	  info.open(map,m);
+	}
+  }
+
+  /*decides which if the marker is selected or not.
+  Markers become white pin when not clicked, and red pin when clicked.
+  Also, when clicked, marker continues to bounce until user clicks another marker*/
+  if(currentMarker!=null){
+    currentMarker.setAnimation(null);
+	currentMarker.setOptions({icon:whitepin});
+  }
+  currentMarker = m;
+  m.setAnimation(google.maps.Animation.BOUNCE);
+  m.setOptions({icon:redpin});
+ }
+
+  /*****Note:The major battles of the civil war are separated into eight sets.
+  Each set is separated by six month periods; therefore, each set contains 
+  battles that happened within that six month period. 
+
+  The "first","second","third" and so on variables in each "for in" loop are the names of each array defined
+  in battles.js file.There are eight arrays that contain eight sets of battles.
+
+  showNext() function contains a counter that increments when user clicks "Jump Forward"
+  button. It contains eight if statements that determine the state of the counter. In each 
+  if, else if, or else statement, markers are created and pushed into an array so they can easily
+  be accessed. When new set of markers is created, the previous set will be set to null.
+  Dates displayed on the website are changed based on the counter. It also contains a listener 
+  on each marker that calls info function;
+  */
+  function showNext(){
+    counter = counter+1;
+
+	//stops the counter from incrementing after 8
+	if(counter > 8){
+	  counter = 8 ;
+	}
+
+	if(counter==1){
+	  for(var item in first){
+	    var mkr=new google.maps.Marker({
+		  title: first[item]['name'],
+		  icon: whitepin,
+		  position: new google.maps.LatLng(first[item]['lat'],first[item]['lon']),
+		  map: map,
+		  animation: google.maps.Animation.DROP
+		});
+		google.maps.event.addListener(mkr,'click',function(){showInfo(this,first)});
+		markers1.push(mkr);
+	  }   
+	  document.getElementById('battleDate').innerHTML="April, 1861 To October, 1861";
+
+	}else if(counter==2){
+	  for(var item in second){
+	    var mkr=new google.maps.Marker({
+		  title: second[item]['name'],
+		  position: new google.maps.LatLng(second[item]['lat'],second[item]['lon']),
+		  icon: whitepin,
+		  map: map,
+	      animation: google.maps.Animation.DROP
+		 })
+		 google.maps.event.addListener(mkr,'click',function(){showInfo(this,second)});
+		 markers2.push(mkr);
+	  }
+	  for(var i=0; i<markers1.length; i++){
+		 markers1[i].setMap(null);
+	  }
+	  document.getElementById('battleDate').innerHTML="October, 1861 To April, 1862";
+
+	}else if(counter==3){
+	  for(var item in third){
+	    var mkr=new google.maps.Marker({
+		  title: third[item]['name'],
+		  position: new google.maps.LatLng(third[item]['lat'],third[item]['lon']),
+		  icon: whitepin,
+		  map: map,
+	      animation: google.maps.Animation.DROP
+		})
+		google.maps.event.addListener(mkr,'click',function(){showInfo(this,third)});
+		markers3.push(mkr);
+	  }
+      for(var i=0; i<markers2.length; i++){
+	    markers2[i].setMap(null);
+	  }
+	  document.getElementById('battleDate').innerHTML="April, 1862 To October, 1862";
+
+	}else if(counter==4){
+      for(var item in fourth){
+	    var mkr=new google.maps.Marker({
+		  title: fourth[item]['name'],
+		  position: new google.maps.LatLng(fourth[item]['lat'],fourth[item]['lon']),
+	      icon: whitepin,
+		  map: map,
+		  animation: google.maps.Animation.DROP
+		})
+		google.maps.event.addListener(mkr,'click',function(){showInfo(this,fourth)});
+		markers4.push(mkr);
+	  }
+	  for(var i=0; i<markers3.length; i++){
+	    markers3[i].setMap(null);
+	  }
+	  document.getElementById('battleDate').innerHTML="October, 1862 To April, 1863";
+
+	}else if(counter==5){
+      for(var item in fifth){
+	    var mkr=new google.maps.Marker({
+		  title: fifth[item]['name'],
+		  position: new google.maps.LatLng(fifth[item]['lat'],fifth[item]['lon']),
+		  icon: whitepin,
+		  map: map,
+		  animation: google.maps.Animation.DROP
+		})
+		google.maps.event.addListener(mkr,'click',function(){showInfo(this,fifth)});
+		markers5.push(mkr);
+	  }
+	  for(var i=0; i<markers4.length; i++){
+		markers4[i].setMap(null);
+	  }
+	  document.getElementById('battleDate').innerHTML="April, 1863 To October, 1863";
+
+	}else if(counter==6){
+      for(var item in sixth){
+	    var mkr=new google.maps.Marker({
+		  title: sixth[item]['name'],
+	      position: new google.maps.LatLng(sixth[item]['lat'],sixth[item]['lon']),
+		  icon: whitepin,
+		  map: map,
+		  animation: google.maps.Animation.DROP
+		})
+		google.maps.event.addListener(mkr,'click',function(){showInfo(this,sixth)});
+		markers6.push(mkr);
+	  }
+	  for(var i=0; i<markers5.length; i++){
+	    markers5[i].setMap(null);
+	  }
+	  document.getElementById('battleDate').innerHTML="October, 1863 To April, 1864";
+
+	}else if(counter==7){
+      for(var item in seventh){
+	    var mkr=new google.maps.Marker({
+		  title: seventh[item]['name'],
+		  position: new google.maps.LatLng(seventh[item]['lat'],seventh[item]['lon']),
+		  icon: whitepin,
+		  map: map,
+		  animation: google.maps.Animation.DROP
+		})
+		google.maps.event.addListener(mkr,'click',function(){showInfo(this,seventh)});
+		markers7.push(mkr);
+	  }
+	  for(var i=0; i<markers6.length; i++){
+	    markers6[i].setMap(null);
+	  }
+	  document.getElementById('battleDate').innerHTML="April, 1864 To October, 1864";
+
+    }else{
+	  for(var item in eighth){
+	    var mkr=new google.maps.Marker({
+		  title: eighth[item]['name'],
+		  position: new google.maps.LatLng(eighth[item]['lat'],eighth[item]['lon']),
+		  icon: whitepin,
+		  map: map,
+		  animation: google.maps.Animation.DROP
+		})
+		google.maps.event.addListener(mkr,'click',function(){showInfo(this,eighth)});
+		markers8.push(mkr);
+	  }
+      for(var i=0; i<markers7.length; i++){
+	    markers7[i].setMap(null);
+	  }
+	  document.getElementById('battleDate').innerHTML="October, 1864 To May, 1865 (End Of Civil War)";
+	}
+  };
+
+	/*showLast() function is similar to showNext(). It simply clears the previou set of markers and 
+	displays the new set when "Jump Backward" button is clicked.
+
+	In each if,else if, or else statement, a set of markers in an array is set to null
+	and that array is emptied while another set of markers is set on the map in a for loop.
+	*/
+  function showLast(){
+    counter = counter-1;
+  
+    if(counter < 0){
+      counter = 0;
+    }
+
+    if(counter==0){
+      for(var i = 0; i < markers1.length; i++){
+	    markers1[i].setMap(null);
+	  }
+	  markers1 = [];
+	  document.getElementById('battleDate').innerHTML="Click 'Jump Forward' button to advance the war by six months, or 'Jump Backward' button to go back to previous period in the war";
+
+    }else if(counter==1){
+	  for(var j = 0; j < markers1.length; j++){
+	    markers1[j].setMap(map);
+		markers1[j].setAnimation(google.maps.Animation.DROP);
+	  }
+	  for(var i = 0; i < markers2.length; i++){
+		markers2[i].setMap(null);
+	  }
+	  markers2 = [];
+	  document.getElementById('battleDate').innerHTML="April, 1861 To October, 1861";
+
+	}else if(counter==2){
+      for(var j = 0; j < markers2.length; j++){
+	    markers2[j].setMap(map);
+		markers2[j].setAnimation(google.maps.Animation.DROP);
+	  }
+	  for(var i = 0; i < markers3.length; i++){
+	    markers3[i].setMap(null);
+	  }
+	  markers3 = [];
+      document.getElementById('battleDate').innerHTML="October, 1861 To April, 1862";
+
+	}else if(counter==3){
+	  for(var j = 0; j < markers3.length; j++){
+		markers3[j].setMap(map);
+	    markers3[j].setAnimation(google.maps.Animation.DROP);
+	  }
+	  for(var i = 0; i < markers4.length; i++){
+		markers4[i].setMap(null);
+	  }
+	  markers4 = [];
+	  document.getElementById('battleDate').innerHTML="April, 1862 To October, 1862";
+
+	}else if(counter==4){
+	  for(var j = 0; j < markers4.length; j++){
+	    markers4[j].setMap(map);
+		markers4[j].setAnimation(google.maps.Animation.DROP);
+	  }
+	  for(var i = 0; i < markers5.length; i++){
+		markers5[i].setMap(null);
+	  }
+	  markers5 = [];
+	  document.getElementById('battleDate').innerHTML="October, 1862 To April, 1863";
+
+    }else if(counter==5){
+      for(var j = 0; j < markers5.length; j++){
+	    markers5[j].setMap(map);
+		markers5[j].setAnimation(google.maps.Animation.DROP);
+	  }
+	  for(var i = 0; i < markers6.length; i++){
+	    markers6[i].setMap(null);
+	  }
+      markers6 = [];
+	  document.getElementById('battleDate').innerHTML="April, 1863 To October, 1863";
+
+    }else if(counter==6){
+      for(var j = 0; j < markers6.length; j++){
+		markers6[j].setMap(map);
+		markers6[j].setAnimation(google.maps.Animation.DROP);
+	  }
+	  for(var i = 0; i < markers7.length; i++){
+	    markers7[i].setMap(null);
+	  }
+	  markers7 = [];
+	  document.getElementById('battleDate').innerHTML="October, 1863 To April, 1864";
+
+	}else if(counter==7){
+      for(var j = 0; j < markers7.length; j++){
+	    markers7[j].setMap(map);
+		markers7[j].setAnimation(google.maps.Animation.DROP);
+	  }
+	  for(var i = 0; i < markers8.length; i++){
+	    markers8[i].setMap(null);
+	  }
+      markers8 = [];
+	  document.getElementById('battleDate').innerHTML="April, 1864 To October, 1864";
+	}
+  };
+
+</script>
+</head>
+
+
+<body id="body" onload="initialize()">
+
+<div id="header">
+   <h1 id="mainTitle">American Civil War</h1>
+   <p><span>Welcome to Chao and Robert's Civil War Site.</span> Feel free to use this map to gain
+   a better understanding of some of the major battles of the war, and where they
+   took place. Using this map, you can see where the battles took place with relation
+   to each other, as well as how the front lines were moving througout the war.
+   We hope that seeing the war from this perspective will help you gain a newfound
+   understanding of one of America's most important historical events.</p>
+   <a id="heatMapLink" href="casualty.html">See casualty heatmap</a>
+</div>
+
+<div id="dateContainer">
+  <p id="battleDate">Click 'Jump Forward' button to advance the war by six months, or 'Jump Backward' button to go back to previous period in the war</p>
+</div>
+
+<div id="infoTitle">
+  <p id="battleName">Name Of The Battle</p>
+</div>
+
+<div id="map"></div>
+
+<div id="infoWindow">
+	 <p id="details">Each pin on the map represents a major battle during the Civil War.
+  Click on any pins shown on the map to see more details about the battle!</p>
+</div>
+
+<div id="Container">
+  <button id="backwardBtn" onclick="showLast()">Jump Backward</button>
+  <div id="confedKey">Confederate States</div>
+  <div id="unionKey">Union States</div>
+  <div id="borderKey">Border States</div>
+  <button id="forwardBtn" onclick="showNext()">Jump forward</button>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,73 @@
+<!--
+Chao Lin
+Robert Leese
+CS 286
+American Civil War
+-->
+
+<html>
+<head>
+<title>Casualty</title>
+<link rel="stylesheet" href="heatMap.css">
+<script	src="http://maps.google.com/maps/api/js?"> </script>
+<script src="https://maps.googleapis.com/maps/api/js?libraries=visualization"></script>
+<script src="heatMapDatas.js"></script>
+<script> 
+var data;
+var map;
+var heatmap;
+var battles = [group1, group2, group3, group4, group5, group6, group7, group8, group9, group10];
+
+function initialize(){
+	var iniLocation = new google.maps.LatLng(37.8393, -84.2700);
+	var minZoom = 5;
+	data = [];
+
+	var settings = {
+	  zoom: minZoom,
+	  center: iniLocation,
+	  mapTypeId: google.maps.MapTypeId.HYBRID,
+	  disableDefaultUI:true
+	}
+
+	map = new google.maps.Map(document.getElementById("mapCanvas"), settings);
+
+	heatmap = new google.maps.visualization.HeatmapLayer({
+		map:map,
+		data: data,
+		radius:1,
+		dissipating:false,
+		opacity:0.75,
+		maxIntensity:35000
+	});
+}
+
+function animateHeatMap(){
+	var count = 0;
+	var anime = window.setInterval(function(){
+ 	  for(var item in battles[count]){
+ 		data.push({location: new google.maps.LatLng(battles[count][item]['lat'],battles[count][item]['lon']),weight:battles[count][item]['totalCasualty']});
+ 	  }
+ 	  heatmap.setData(data);
+ 	  count++;
+ 	  if(count == battles.length){clearInterval(anime)};
+ 	},1000);
+}
+
+</script>
+</head>
+<body id="heatMapBody" onload="initialize()">
+  <div id="heatmapTitleBox">
+    <p id="heatMapTitle">Casualty Heatmap</p>
+    <br></br>
+    <p id="heatIntro"> Below is a heat map that shows the casualty of each battle during the civil war.<br></br>
+    Click on button below to see the accumulation of deaths during the war! </p>
+
+	<a id="mainPageLink" href="index.html">Go back to main page</a>
+  </div>
+  <div id="btnContainer">
+  <button id="animationBtn" onclick="animateHeatMap()">Start Animation </button>
+  </div>
+  <div id="mapCanvas"></div>
+</body>
+</html>

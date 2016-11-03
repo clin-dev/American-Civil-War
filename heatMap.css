@@ -1,0 +1,75 @@
+/*
+Chao Lin
+Robert Leese
+American Civil War
+*/
+
+#mapCanvas{
+	width:70%;
+	height:70%;
+	margin:2% auto;
+	border: 10px solid black;
+}
+
+#heatMapbody{
+	background: #287352;
+}
+
+#heatmapTitleBox{
+	font-weight: bold;
+	text-align: center;
+	width:70%;
+	margin:0 auto;
+	padding: 10px 0px 10px 0px;
+	border:solid 7px black;
+}
+
+#heatMapTitle{
+	color:white;
+	letter-spacing: 2px;
+	font-size: 3em;
+	margin:0 auto;
+}
+
+#mainPageLink{
+    font-size:1.3em;
+    padding-top: -2em;
+}
+
+#confedFlag{
+	position: relative;
+	width: 250px;
+	height:150px;
+	float:left;
+}
+
+#unionFlag{
+	width: 250px;
+	height:150px;
+	float:right;
+}
+
+#heatIntro{
+	font-size: 1em;
+	color:#FFCF79;
+	margin-top: -0.8em;
+}
+
+#slider{
+	width:70%;
+	margin:0 auto;
+}
+
+#btnContainer{
+	margin:2em auto;
+	text-align: center;
+}
+
+#animationBtn{
+	width: 400px;
+	height: 50px;
+	font-size: 16px;
+	border-radius: 20px;
+	background:#FFCF79;
+	font-weight: bold;
+}

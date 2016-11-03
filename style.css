@@ -1,0 +1,134 @@
+/*
+Chao Lin
+Robert Leese
+CS 286
+Dr.Dale
+American Civil War
+*/
+
+span{
+	color:white;
+	font-size:20px;
+}
+
+#header p{
+	color:#FFCF79;
+}
+
+#header{
+	width:100%;
+	background:#287352;
+	margin-top:-20px;
+	padding: 5px 0px 20px 10px;
+	text-align: center;
+	font-size: 18px;
+}
+
+#heatMapLink{
+	margin-top: -1.7em;
+	font-size:1.3em;
+}
+
+#mainTitle{
+	color:white;
+	letter-spacing: 2px;
+	font-size: 3em;
+}
+
+#dateContainer{
+	width:75%;
+	float:left;
+    background: #FFCF79;
+	padding-bottom: 10px;
+}
+
+#battleDate{
+	color:#287352;
+	font-size: 20px;
+	text-align: center;
+	font-weight: bold;
+}
+
+#infoTitle{
+	width:25%;
+	float: right;
+	background:#E5E4D7;
+	padding-bottom: 10px;
+}
+
+#battleName{
+	color:#287352;
+	font-size: 18px;
+	text-align: center;
+	font-weight: bold;
+}
+	
+#map{
+	width:75%;
+	height:80%;
+	float:left;
+}
+	
+#infoWindow{
+	width:25%;
+	height:80%;
+	/*background: #E0E0E0;*/
+	background: white;
+	float:right;
+}
+
+#details{
+	font-size:18px;
+	padding:0px 10px 10px 10px;
+}
+
+#Container{
+	float:left;
+	width:75%;
+	height:100px;
+	border-top: solid #287352 10px;
+	padding-top: 5px;
+}
+
+#forwardBtn{
+	float:right;
+	height:50px;
+	border-radius: 5px;
+}
+
+#backwardBtn{
+	float:left;
+	height:50px;
+	border-radius: 5px;
+}
+
+#confedKey{
+	width:80px;
+	height:50px;
+	background:#FF3333;
+	display: inline-block;
+	padding-top: 5px;
+	margin-left: 30%;
+	text-align: center;
+	border-radius: 6px;
+}
+
+#unionKey{
+	width:80px;
+	height:50px;
+	background:#0080FF;
+	padding-top: 5px;
+	display: inline-block;
+	text-align: center;
+	border-radius: 6px;
+}
+
+#borderKey{
+	width:80px;
+	height:50px;
+	background:#CCCC00;
+	display: inline-block;
+	padding-top: 5px;
+	text-align: center;
+	border-radius: 6px;
+}
