@@ -1,8 +1,6 @@
 /*
 Chao Lin
-Robert Leese
 CS 286
-Dr.Dale
 American Civil War
 */
 
